@@ -72,7 +72,7 @@ class FinanceTeamAgent(Workflow):
     async def extract_contents(self, ev: ClassificationResult, extract: Annotated[LlamaExtract, Resource(get_extract_client)], llm: Annotated[StructuredLLM, Resource(get_llm)], ctx: Context[WorkflowState]) -> SendEmail:
         state = await ctx.store.get_state()
         if ev.classification == "expense":
-            extracted_data = cast(ExtractRun, await extract.aextract(data_schema=Expense, files=ev.attachment, config=ExtractConfig()))
+            extracted_data = cast(ExtractRun, await extract.aextract(data_schema=Expense, files=state.temporary_file_path, config=ExtractConfig()))
             if extracted_data.data is not None:
                 data = cast(dict[str, Any], extracted_data.data)
                 if cast(float, data["amount"]) < 1000.0:
@@ -95,7 +95,7 @@ class FinanceTeamAgent(Workflow):
                 os.remove(state.temporary_file_path)
                 return SendEmail(error="There was an error while extracting data for the email")
         else:
-            extracted_data = cast(ExtractRun, await extract.aextract(data_schema=Invoice, files=ev.attachment, config=ExtractConfig()))
+            extracted_data = cast(ExtractRun, await extract.aextract(data_schema=Invoice, files=state.temporary_file_path, config=ExtractConfig()))
             if extracted_data.data is not None:
                 data = cast(dict[str, Any], extracted_data.data)
                 res = await llm.achat(messages=[ChatMessage(role="system", content="You are an email writer and formatter. Write the email and produce HTML that represents the body"), ChatMessage(content=f"""Construct a reply to {ev.email}, that the invoice has been received and give in for on who will be payed and how much based on the info in {json.dumps(extracted_data, indent=4)}. Keep in mind that {state.sender} sent you this email: {state.body}""")])
