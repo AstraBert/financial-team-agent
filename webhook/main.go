@@ -20,7 +20,8 @@ func main() {
 			w.WriteHeader(500)
 			return
 		}
-		reqBody := RequestBody{Sender: emailEvent.Data.From, Subject: emailEvent.Data.Subject, EmailId: emailEvent.Data.EmailID}
+		inptEvent := InputEvent{Sender: emailEvent.Data.From, Subject: emailEvent.Data.Subject, EmailId: emailEvent.Data.EmailID}
+		reqBody := RequestBody{StartEvent: inptEvent, Context: map[string]any{}, HandlerId: ""}
 		reqBodyData, err := json.Marshal(reqBody)
 		if err != nil {
 			w.WriteHeader(500)

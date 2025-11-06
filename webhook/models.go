@@ -27,6 +27,12 @@ type Attachment struct {
 }
 
 type RequestBody struct {
+	StartEvent InputEvent     `json:"start_event"`
+	Context    map[string]any `json:"context"`
+	HandlerId  string         `json:"handler_id"`
+}
+
+type InputEvent struct {
 	Sender  string `json:"sender"`
 	Subject string `json:"subject"`
 	EmailId string `json:"email_id"`
