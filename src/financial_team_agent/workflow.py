@@ -18,7 +18,7 @@ from .resources import Invoice, Expense, get_classify_client, get_extract_client
 
 class FinanceTeamAgent(Workflow):
     @step
-    async def process_received_email(self, ev: EmailReceived, ctx: Context[WorkflowState]):
+    async def process_received_email(self, ev: EmailReceived, ctx: Context[WorkflowState]) -> SendEmail | EmailProcessed:
         async with ctx.store.edit_state() as state:
             state.sender = ev.sender
             state.subject = ev.subject
@@ -45,6 +45,8 @@ class FinanceTeamAgent(Workflow):
                         return EmailProcessed(attachment_file_path=fl.name)
             else:
                 return SendEmail(error="The attachment must be a PDF file or a PNG/JPEG image")
+        else:
+            return SendEmail(error="No email data available")
     @step
     async def classify_email(self, ev: EmailProcessed, classifier: Annotated[ClassifyClient, Resource(get_classify_client)], ctx: Context[WorkflowState]) -> ClassificationResult | SendEmail:
         rules = [
