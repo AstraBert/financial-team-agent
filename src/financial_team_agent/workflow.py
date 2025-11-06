@@ -98,7 +98,7 @@ class FinanceTeamAgent(Workflow):
             extracted_data = cast(ExtractRun, await extract.aextract(data_schema=Invoice, files=state.temporary_file_path, config=ExtractConfig()))
             if extracted_data.data is not None:
                 data = cast(dict[str, Any], extracted_data.data)
-                res = await llm.achat(messages=[ChatMessage(role="system", content="You are an email writer and formatter. Write the email and produce HTML that represents the body"), ChatMessage(content=f"""Construct a reply to {ev.email}, that the invoice has been received and give in for on who will be payed and how much based on the info in {json.dumps(extracted_data, indent=4)}. Keep in mind that {state.sender} sent you this email: {state.body}""")])
+                res = await llm.achat(messages=[ChatMessage(role="system", content="You are an email writer and formatter. Write the email and produce HTML that represents the body"), ChatMessage(content=f"""Construct a reply to {state.sender}, that the invoice has been received and give in for on who will be payed and how much based on the info in {json.dumps(extracted_data, indent=4)}. Keep in mind that {state.sender} sent you this email: {state.body}""")])
                 os.remove(state.temporary_file_path)
                 if res.message.content is not None:
                     body = EmailBody.model_validate_json(res.message.content)
