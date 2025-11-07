@@ -1,0 +1,23 @@
+name: Deploy LlamaAgent
+
+on:
+  push: 
+    branches:
+        - main
+    paths:
+      - "src/financial_team_agent/**"
+      - "pyproject.toml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update deployment
+        uses: run-llama/llamactl-deploy@v0.1.0
+        with:
+          llama-cloud-api-key: ${{ secrets.LLAMA_CLOUD_API_KEY }}
+          llama-cloud-project-id: ${{ secrets.LLAMA_CLOUD_PROJECT_ID }}
+          deployment-id: "financial-team"
+          git-reference: ${{ github.sha }}
